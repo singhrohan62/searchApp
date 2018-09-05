@@ -1,16 +1,51 @@
 import React from 'react';
 import Loader from './Loader';
 import {StyleSheet, View, Text} from 'react-native';
+import SearchBody from './SearchBody';
 import { Container, Header, Item, Input, Icon, Button } from 'native-base';
+import axios from 'axios';
 
 export default class Search extends React.Component {
 	state = {
 		pokeSearch : ' ',
+		onCall : true,
+		data : {}
 	}
 
 	searchPoke = () => {
-		let x = this.state.pokeSearch;
-		console.log("button tapped " + x);
+		this.setState({onCall : true})
+		if(this.state.pokeSearch === ' ')
+		{
+			return;
+		}
+
+		var self = this;
+		fetch(`http://pokeapi.co/api/v2/pokemon/100`)
+		.then((response) => response.json())
+		.then((responseJson) => {
+			console.log(responseJson.forms)
+			self.setState({data : responseJson.forms.name});
+			self.setState({onCall : false});
+		})
+		.catch(function(error){
+			console.log(error);
+		});
+	}
+
+	renderBody = () => {
+		if(this.state.onCall)
+		{
+			return (
+					<Loader/>
+				)
+		}
+
+		else
+		{
+			return (
+					<SearchBody data={this.state.data}/>
+				)
+		}
 	}
 
 	render () {
@@ -29,7 +64,7 @@ export default class Search extends React.Component {
 			              />
 			          </Item>
 			        </Header>
-			        <Loader/>
+			        {this.renderBody()}
 			     </View>
 			)
 	}
